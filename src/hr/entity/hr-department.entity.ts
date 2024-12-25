@@ -5,8 +5,8 @@ import {
   JoinColumn,
   CreateDateColumn,
 } from 'typeorm';
-import { Employee } from './employee.entity';
-import { Position } from './position.entity';
+import { Employee } from '../../employee/entity/employee.entity';
+import { Position } from '../../position/entity/position.entity';
 
 @Entity({ database: 'postgress' })
 export class HrDepartment {

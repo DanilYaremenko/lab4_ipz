@@ -5,9 +5,9 @@ import {
   CreateDateColumn,
   OneToMany,
 } from 'typeorm';
-import { Gender } from './enum/gender.enum';
-import { EmployeeStatus } from './enum/employee-status.enum';
-import { HrDepartment } from './hr-department.entity';
+import { Gender } from '../../common/gender.enum';
+import { EmployeeStatus } from '../enum/employee-status.enum';
+import { HrDepartment } from '../../hr/entity/hr-department.entity';
 
 @Entity({ database: 'postgress' })
 export class Employee {

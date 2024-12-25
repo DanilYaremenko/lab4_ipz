@@ -1,5 +1,5 @@
+import { HrDepartment } from 'src/hr/entity/hr-department.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { HrDepartment } from './hr-department.entity';
 
 @Entity({ database: 'postgress' })
 export class Position {
