@@ -41,4 +41,10 @@ export class Employee {
 
   @OneToMany(() => HrDepartment, (hrDepartment) => hrDepartment.employee)
   positions: HrDepartment[];
+
+  @Column({ type: 'bytea', nullable: true })
+  imageBlob?: Buffer;
+
+  @Column({ nullable: true })
+  imageUrl?: string;
 }

@@ -8,12 +8,14 @@ import { Repository } from 'typeorm';
 import { Employee } from './entity/employee.entity';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class EmployeeService {
   constructor(
     @InjectRepository(Employee)
     private employeeRepository: Repository<Employee>,
+    private cloudinaryService: CloudinaryService,
   ) {}
 
   async findAll(): Promise<Employee[]> {
@@ -46,7 +48,16 @@ export class EmployeeService {
 
   async create(createEmployeeDto: CreateEmployeeDto): Promise<Employee> {
     try {
-      const employee = this.employeeRepository.create(createEmployeeDto);
+      const { image, storageType, ...employeeData } = createEmployeeDto;
+      const employee = this.employeeRepository.create(employeeData);
+
+      if (image) {
+        if (storageType === 'database') {
+          employee.imageBlob = image.buffer;
+        } else {
+          employee.imageUrl = await this.cloudinaryService.uploadImage(image);
+        }
+      }
 
       return await this.employeeRepository.save(employee);
     } catch (error) {
@@ -62,16 +73,27 @@ export class EmployeeService {
   ): Promise<Employee> {
     try {
       const employee = await this.findOne(id);
-      if (!employee) {
-        throw new NotFoundException(`Employee with ID ${id} not found`);
-      }
-      await this.employeeRepository.update(id, updateEmployeeDto);
+      const { image, storageType, ...employeeData } = updateEmployeeDto;
 
-      return await this.employeeRepository.findOne({ where: { id } });
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
+      if (image) {
+        if (storageType === 'database') {
+          employee.imageBlob = image.buffer;
+          employee.imageUrl = null;
+        } else {
+          const imageUrl = await this.cloudinaryService.uploadImage(image);
+          employee.imageUrl = imageUrl;
+          employee.imageBlob = null;
+        }
       }
+
+      const updatedEmployee = await this.employeeRepository.save({
+        ...employee,
+        ...employeeData,
+      });
+
+      return updatedEmployee;
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
       throw new BadRequestException(
         `Failed to update employee with ID ${id}: ${error.message}`,
       );
@@ -91,6 +113,31 @@ export class EmployeeService {
     } catch (error) {
       throw new BadRequestException(
         `Failed to delete employee with ID ${id}: ${error.message}`,
+      );
+    }
+  }
+
+  async getImage(id: number): Promise<{ buffer?: Buffer; url?: string }> {
+    try {
+      const employee = await this.findOne(id);
+
+      if (!employee) {
+        throw new NotFoundException(`Employee with ID ${id} not found`);
+      }
+
+      if (employee.imageBlob) {
+        return { buffer: employee.imageBlob };
+      }
+
+      if (employee.imageUrl) {
+        return { url: employee.imageUrl };
+      }
+
+      throw new NotFoundException(`No image found for employee with ID ${id}`);
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new BadRequestException(
+        `Failed to fetch image for employee with ID ${id}: ${error.message}`,
       );
     }
   }

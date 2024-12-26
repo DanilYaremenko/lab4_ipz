@@ -8,6 +8,7 @@ import { ClientModule } from './client/client.module';
 import { EmployeeModule } from './employee/employee.module';
 import { HrModule } from './hr/hr.module';
 import { PositionModule } from './position/position.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { PositionModule } from './position/position.module';
     EmployeeModule,
     HrModule,
     PositionModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

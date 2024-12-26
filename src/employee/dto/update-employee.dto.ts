@@ -8,6 +8,7 @@ import {
 } from 'class-validator';
 import { Gender } from '../../common/gender.enum';
 import { EmployeeStatus } from '../enum/employee-status.enum';
+import { StorageTypeEnum } from '../enum/storage-type.enum';
 
 export class UpdateEmployeeDto {
   @IsString()
@@ -35,4 +36,11 @@ export class UpdateEmployeeDto {
   @IsEnum(EmployeeStatus)
   @IsOptional()
   status?: EmployeeStatus;
+
+  @IsOptional()
+  image?: Express.Multer.File;
+
+  @IsString()
+  @IsOptional()
+  storageType?: StorageTypeEnum;
 }

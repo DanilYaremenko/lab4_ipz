@@ -5,9 +5,11 @@ import {
   IsNotEmpty,
   Min,
   Max,
+  IsOptional,
 } from 'class-validator';
 import { Gender } from '../../common/gender.enum';
 import { EmployeeStatus } from '../enum/employee-status.enum';
+import { StorageTypeEnum } from '../enum/storage-type.enum';
 
 export class CreateEmployeeDto {
   @IsString()
@@ -32,4 +34,11 @@ export class CreateEmployeeDto {
 
   @IsEnum(EmployeeStatus)
   status: EmployeeStatus;
+
+  @IsOptional()
+  image?: Express.Multer.File;
+
+  @IsEnum(StorageTypeEnum)
+  @IsOptional()
+  storageType?: StorageTypeEnum = StorageTypeEnum.CLOUDINARY;
 }
