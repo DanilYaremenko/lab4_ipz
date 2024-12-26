@@ -1,44 +1,64 @@
-import {
-  IsString,
-  IsNumber,
-  IsEnum,
-  IsNotEmpty,
-  Min,
-  Max,
-  IsOptional,
-} from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Gender } from '../../common/gender.enum';
 import { EmployeeStatus } from '../enum/employee-status.enum';
+import { IsOptional } from 'class-validator';
 import { StorageTypeEnum } from '../enum/storage-type.enum';
+import { IsString } from 'class-validator';
 
 export class CreateEmployeeDto {
-  @IsString()
-  @IsNotEmpty()
+  @ApiProperty({
+    description: "Employee's first name",
+    example: 'John',
+  })
   firstName: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @ApiProperty({
+    description: "Employee's last name",
+    example: 'Doe',
+  })
   lastName: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @ApiProperty({
+    description: "Employee's middle name",
+    example: 'Robert',
+  })
   middleName: string;
 
-  @IsNumber()
-  @Min(18)
-  @Max(100)
+  @ApiProperty({
+    description: "Employee's age",
+    example: 30,
+  })
   age: number;
 
-  @IsEnum(Gender)
+  @ApiProperty({
+    description: "Employee's gender",
+    enum: Gender,
+    example: Gender.MALE,
+  })
   gender: Gender;
 
-  @IsEnum(EmployeeStatus)
+  @ApiProperty({
+    description: "Employee's status",
+    enum: EmployeeStatus,
+    example: EmployeeStatus.ACTIVE,
+    default: EmployeeStatus.ACTIVE,
+  })
   status: EmployeeStatus;
 
-  @IsOptional()
-  image?: Express.Multer.File;
+  @ApiProperty({
+    description: "Employee's profile image",
+    type: 'string',
+    format: 'binary',
+    required: false,
+  })
+  image?: any;
 
-  @IsEnum(StorageTypeEnum)
+  @ApiPropertyOptional({
+    description: "Employee's storage type",
+    enum: StorageTypeEnum,
+    example: StorageTypeEnum.DATABASE,
+  })
+  @IsString()
   @IsOptional()
-  storageType?: StorageTypeEnum = StorageTypeEnum.CLOUDINARY;
+  storageType?: StorageTypeEnum;
 }

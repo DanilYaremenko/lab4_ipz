@@ -8,12 +8,15 @@ import { Repository } from 'typeorm';
 import { Position } from './entity/position.entity';
 import { CreatePositionDto } from './dto/create-position.dto';
 import { UpdatePositionDto } from './dto/update-position.dto';
+import { EventsService } from 'src/events/events.service';
+import { Events } from 'src/events/enums/events.enum';
 
 @Injectable()
 export class PositionService {
   constructor(
     @InjectRepository(Position)
     private positionRepository: Repository<Position>,
+    private eventsService: EventsService,
   ) {}
 
   async findAll(): Promise<Position[]> {
@@ -42,7 +45,14 @@ export class PositionService {
   async create(createPositionDto: CreatePositionDto): Promise<Position> {
     try {
       const position = this.positionRepository.create(createPositionDto);
-      return await this.positionRepository.save(position);
+      const newPosition = await this.positionRepository.save(position);
+
+      this.eventsService.sendMessage(Events.dataCreated, {
+        model: Position.name,
+        data: newPosition,
+      });
+
+      return newPosition;
     } catch (error) {
       throw new BadRequestException(
         `Failed to create position: ${error.message}`,
@@ -62,7 +72,17 @@ export class PositionService {
       }
 
       await this.positionRepository.update(id, updatePositionDto);
-      return await this.positionRepository.findOne({ where: { id } });
+
+      const updatedPosition = await this.positionRepository.findOne({
+        where: { id },
+      });
+
+      this.eventsService.sendMessage(Events.dataUpdated, {
+        model: Position.name,
+        data: updatedPosition,
+      });
+
+      return updatedPosition;
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       throw new BadRequestException(
@@ -80,6 +100,11 @@ export class PositionService {
       }
 
       await this.positionRepository.delete(id);
+
+      this.eventsService.sendMessage(Events.dataDeleted, {
+        model: Position.name,
+        data: position,
+      });
 
       return true;
     } catch (error) {

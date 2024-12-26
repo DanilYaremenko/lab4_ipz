@@ -1,19 +1,28 @@
-import { IsString, IsNumber, IsNotEmpty, Min } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreatePositionDto {
-  @IsString()
-  @IsNotEmpty()
+  @ApiProperty({
+    description: "Position's title",
+    example: 'Senior Developer',
+  })
   title: string;
 
-  @IsNumber()
-  @Min(0)
+  @ApiProperty({
+    description: "Position's salary",
+    example: 75000.0,
+    type: 'number',
+  })
   salary: number;
 
-  @IsString()
-  @IsNotEmpty()
+  @ApiProperty({
+    description: "Position's responsibilities",
+    example: 'Leading development team, code review, architecture design',
+  })
   responsibilities: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @ApiProperty({
+    description: "Position's requirements",
+    example: '5+ years experience, Bachelor degree in Computer Science',
+  })
   requirements: string;
 }

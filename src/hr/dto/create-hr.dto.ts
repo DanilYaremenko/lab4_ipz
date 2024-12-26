@@ -1,9 +1,15 @@
-import { IsNumber } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateHrDto {
-  @IsNumber()
+  @ApiProperty({
+    description: 'Employee ID to be assigned to the position',
+    example: 1,
+  })
   employeeId: number;
 
-  @IsNumber()
+  @ApiProperty({
+    description: 'Position ID to be assigned to the employee',
+    example: 1,
+  })
   positionId: number;
 }

@@ -26,21 +26,40 @@ services:
       - postgres_data:/var/lib/postgresql/data
     env_file:
       - .env
-  # api:
-  #   container_name: ipz4_api
-  #   build: 
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   restart: always
-  #   ports:
-  #     - "3000:3000"
-  #   environment:
-  #     - POSTGRES_URL=${POSTGRES_URL}
-  #     - MONGO_URI=${MONGO_URI}
-  #   depends_on:
-  #     - mongodb
-  #     - postgres
+
+  api:
+    container_name: ipz4_api
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - POSTGRES_URL=${POSTGRES_URL}
+      - MONGO_URI=${MONGO_URI}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+    depends_on:
+      - mongodb
+      - postgres
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq_ipz4
+    ports:
+      - "5672:5672"
+      - "15672:15672"  
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    env_file:
+      - .env
 
 volumes:
   mongo_data:
   postgres_data:
+  rabbitmq_data:

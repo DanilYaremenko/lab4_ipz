@@ -9,12 +9,15 @@ import { Client, ClientDocument } from './schemas/client.schema';
 import { ClientFilterOptions } from './dto/client-filter.dto';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
+import { EventsService } from 'src/events/events.service';
+import { Events } from 'src/events/enums/events.enum';
 
 @Injectable()
 export class ClientService {
   constructor(
     @InjectModel(Client.name)
     private readonly clientModel: Model<ClientDocument>,
+    private readonly eventsService: EventsService,
   ) {}
 
   async findAll(
@@ -77,6 +80,12 @@ export class ClientService {
   async create(createClientDto: CreateClientDto): Promise<Client> {
     try {
       const newClient = new this.clientModel(createClientDto);
+
+      this.eventsService.sendMessage(Events.dataCreated, {
+        model: Client.name,
+        data: newClient,
+      });
+
       return (await newClient.save()).toObject() as Client;
     } catch (error) {
       throw new BadRequestException(
@@ -97,6 +106,12 @@ export class ClientService {
         .findByIdAndUpdate(id, updateClientDto, { new: true })
         .lean()
         .exec();
+
+      this.eventsService.sendMessage(Events.dataUpdated, {
+        model: Client.name,
+        data: updatedClient,
+      });
+
       return updatedClient as Client;
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
@@ -115,6 +130,11 @@ export class ClientService {
       }
 
       await this.clientModel.findByIdAndDelete(id).exec();
+
+      this.eventsService.sendMessage(Events.dataDeleted, {
+        model: Client.name,
+        data: client,
+      });
 
       return true;
     } catch (error) {

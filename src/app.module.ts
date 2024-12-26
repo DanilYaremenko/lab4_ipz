@@ -9,6 +9,7 @@ import { EmployeeModule } from './employee/employee.module';
 import { HrModule } from './hr/hr.module';
 import { PositionModule } from './position/position.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import EventsModule from './events/events.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
     HrModule,
     PositionModule,
     CloudinaryModule,
+    EventsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

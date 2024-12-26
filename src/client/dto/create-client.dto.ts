@@ -1,35 +1,43 @@
-import {
-  IsString,
-  IsNumber,
-  IsEnum,
-  IsNotEmpty,
-  Min,
-  Max,
-} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 import { Gender } from '../../common/gender.enum';
 import { ContactType } from '../enum/contact-type.enum';
 
 export class CreateClientDto {
-  @IsString()
-  @IsNotEmpty()
+  @ApiProperty({
+    description: "Client's first name",
+    example: 'Jane',
+  })
   firstName: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @ApiProperty({
+    description: "Client's last name",
+    example: 'Smith',
+  })
   lastName: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @ApiProperty({
+    description: "Client's middle name",
+    example: 'Marie',
+  })
   middleName: string;
 
-  @IsNumber()
-  @Min(0)
-  @Max(150)
+  @ApiProperty({
+    description: "Client's age",
+    example: 25,
+  })
   age: number;
 
-  @IsEnum(Gender)
+  @ApiProperty({
+    description: "Client's gender",
+    enum: Gender,
+    example: Gender.FEMALE,
+  })
   gender: Gender;
 
-  @IsEnum(ContactType)
+  @ApiProperty({
+    description: "Client's contact type",
+    enum: ContactType,
+    example: ContactType.EMAIL,
+  })
   contacts: ContactType;
 }

@@ -9,6 +9,8 @@ import { Employee } from './entity/employee.entity';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { Events } from 'src/events/enums/events.enum';
+import { EventsService } from 'src/events/events.service';
 
 @Injectable()
 export class EmployeeService {
@@ -16,6 +18,7 @@ export class EmployeeService {
     @InjectRepository(Employee)
     private employeeRepository: Repository<Employee>,
     private cloudinaryService: CloudinaryService,
+    private eventsService: EventsService,
   ) {}
 
   async findAll(): Promise<Employee[]> {
@@ -50,6 +53,11 @@ export class EmployeeService {
     try {
       const { image, storageType, ...employeeData } = createEmployeeDto;
       const employee = this.employeeRepository.create(employeeData);
+
+      this.eventsService.sendMessage(Events.dataCreated, {
+        model: Employee.name,
+        data: employee,
+      });
 
       if (image) {
         if (storageType === 'database') {
@@ -91,6 +99,11 @@ export class EmployeeService {
         ...employeeData,
       });
 
+      this.eventsService.sendMessage(Events.dataUpdated, {
+        model: Employee.name,
+        data: updatedEmployee,
+      });
+
       return updatedEmployee;
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
@@ -108,6 +121,11 @@ export class EmployeeService {
       }
 
       await this.employeeRepository.delete(id);
+
+      this.eventsService.sendMessage(Events.dataDeleted, {
+        model: Employee.name,
+        data: employee,
+      });
 
       return true;
     } catch (error) {

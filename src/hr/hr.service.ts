@@ -8,6 +8,8 @@ import { Repository } from 'typeorm';
 import { HrDepartment } from './entity/hr-department.entity';
 import { CreateHrDto } from './dto/create-hr.dto';
 import { UpdateHrDto } from './dto/update-hr.dto';
+import { EventsService } from 'src/events/events.service';
+import { Events } from 'src/events/enums/events.enum';
 export interface HrFilterOptions {
   page?: number;
   limit?: number;
@@ -18,6 +20,7 @@ export class HrService {
   constructor(
     @InjectRepository(HrDepartment)
     private hrRepository: Repository<HrDepartment>,
+    private eventsService: EventsService,
   ) {}
 
   async findAll(
@@ -71,7 +74,15 @@ export class HrService {
         employee: { id: createHrDto.employeeId },
         position: { id: createHrDto.positionId },
       });
-      return await this.hrRepository.save(hr);
+
+      const newHr = await this.hrRepository.save(hr);
+
+      this.eventsService.sendMessage(Events.dataCreated, {
+        model: HrDepartment.name,
+        data: newHr,
+      });
+
+      return newHr;
     } catch (error) {
       throw new BadRequestException(
         `Failed to create HR record: ${error.message}`,
@@ -92,10 +103,17 @@ export class HrService {
         position: { id: updateHrDto.positionId },
       });
 
-      return await this.hrRepository.findOne({
+      const updatedHr = await this.hrRepository.findOne({
         where: { id },
         relations: ['employee', 'position'],
       });
+
+      this.eventsService.sendMessage(Events.dataUpdated, {
+        model: HrDepartment.name,
+        data: updatedHr,
+      });
+
+      return updatedHr;
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       throw new BadRequestException(
@@ -113,6 +131,11 @@ export class HrService {
       }
 
       await this.hrRepository.delete(id);
+
+      this.eventsService.sendMessage(Events.dataDeleted, {
+        model: HrDepartment.name,
+        data: hr,
+      });
 
       return true;
     } catch (error) {
