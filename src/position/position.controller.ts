@@ -9,6 +9,8 @@ import {
 } from '@nestjs/common';
 import { PositionService } from './position.service';
 import { Position } from './entity/position.entity';
+import { CreatePositionDto } from './dto/create-position.dto';
+import { UpdatePositionDto } from './dto/update-position.dto';
 
 @Controller('position')
 export class PositionController {
@@ -26,7 +28,7 @@ export class PositionController {
 
   @Post()
   async create(
-    @Body() createPositionDto: Partial<Position>,
+    @Body() createPositionDto: CreatePositionDto,
   ): Promise<Position> {
     return this.positionService.create(createPositionDto);
   }
@@ -34,13 +36,13 @@ export class PositionController {
   @Put(':id')
   async update(
     @Param('id') id: number,
-    @Body() updatePositionDto: Partial<Position>,
+    @Body() updatePositionDto: UpdatePositionDto,
   ): Promise<Position> {
     return this.positionService.update(id, updatePositionDto);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number): Promise<void> {
+  async remove(@Param('id') id: number): Promise<boolean> {
     return this.positionService.remove(id);
   }
 }

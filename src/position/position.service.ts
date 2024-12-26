@@ -6,6 +6,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Position } from './entity/position.entity';
+import { CreatePositionDto } from './dto/create-position.dto';
+import { UpdatePositionDto } from './dto/update-position.dto';
 
 @Injectable()
 export class PositionService {
@@ -37,7 +39,7 @@ export class PositionService {
     }
   }
 
-  async create(createPositionDto: Partial<Position>): Promise<Position> {
+  async create(createPositionDto: CreatePositionDto): Promise<Position> {
     try {
       const position = this.positionRepository.create(createPositionDto);
       return await this.positionRepository.save(position);
@@ -50,7 +52,7 @@ export class PositionService {
 
   async update(
     id: number,
-    updatePositionDto: Partial<Position>,
+    updatePositionDto: UpdatePositionDto,
   ): Promise<Position> {
     try {
       const position = await this.findOne(id);
@@ -69,7 +71,7 @@ export class PositionService {
     }
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number): Promise<boolean> {
     try {
       const position = await this.findOne(id);
 
@@ -78,6 +80,8 @@ export class PositionService {
       }
 
       await this.positionRepository.delete(id);
+
+      return true;
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       throw new BadRequestException(

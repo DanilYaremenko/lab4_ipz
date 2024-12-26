@@ -9,6 +9,8 @@ import {
 } from '@nestjs/common';
 import { EmployeeService } from './employee.service';
 import { Employee } from './entity/employee.entity';
+import { CreateEmployeeDto } from './dto/create-employee.dto';
+import { UpdateEmployeeDto } from './dto/update-employee.dto';
 
 @Controller('employee')
 export class EmployeeController {
@@ -26,7 +28,7 @@ export class EmployeeController {
 
   @Post()
   async create(
-    @Body() createEmployeeDto: Partial<Employee>,
+    @Body() createEmployeeDto: CreateEmployeeDto,
   ): Promise<Employee> {
     return this.employeeService.create(createEmployeeDto);
   }
@@ -34,7 +36,7 @@ export class EmployeeController {
   @Put(':id')
   async update(
     @Param('id') id: number,
-    @Body() updateEmployeeDto: Partial<Employee>,
+    @Body() updateEmployeeDto: UpdateEmployeeDto,
   ): Promise<Employee> {
     return this.employeeService.update(id, updateEmployeeDto);
   }

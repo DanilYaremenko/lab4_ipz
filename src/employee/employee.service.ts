@@ -6,6 +6,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Employee } from './entity/employee.entity';
+import { CreateEmployeeDto } from './dto/create-employee.dto';
+import { UpdateEmployeeDto } from './dto/update-employee.dto';
 
 @Injectable()
 export class EmployeeService {
@@ -42,7 +44,7 @@ export class EmployeeService {
     }
   }
 
-  async create(createEmployeeDto: Partial<Employee>): Promise<Employee> {
+  async create(createEmployeeDto: CreateEmployeeDto): Promise<Employee> {
     try {
       const employee = this.employeeRepository.create(createEmployeeDto);
 
@@ -56,7 +58,7 @@ export class EmployeeService {
 
   async update(
     id: number,
-    updateEmployeeDto: Partial<Employee>,
+    updateEmployeeDto: UpdateEmployeeDto,
   ): Promise<Employee> {
     try {
       const employee = await this.findOne(id);

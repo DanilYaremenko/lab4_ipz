@@ -10,6 +10,8 @@ import {
 } from '@nestjs/common';
 import { HrService } from './hr.service';
 import { HrDepartment } from './entity/hr-department.entity';
+import { CreateHrDto } from './dto/create-hr.dto';
+import { UpdateHrDto } from './dto/update-hr.dto';
 
 @Controller('hr')
 export class HrController {
@@ -30,22 +32,20 @@ export class HrController {
   }
 
   @Post()
-  async create(
-    @Body() createHrDto: Partial<HrDepartment>,
-  ): Promise<HrDepartment> {
+  async create(@Body() createHrDto: CreateHrDto): Promise<HrDepartment> {
     return this.hrService.create(createHrDto);
   }
 
   @Put(':id')
   async update(
     @Param('id') id: number,
-    @Body() updateHrDto: Partial<HrDepartment>,
+    @Body() updateHrDto: UpdateHrDto,
   ): Promise<HrDepartment> {
     return this.hrService.update(id, updateHrDto);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number): Promise<void> {
+  async remove(@Param('id') id: number): Promise<boolean> {
     return this.hrService.remove(id);
   }
 }

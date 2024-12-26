@@ -10,6 +10,8 @@ import {
 } from '@nestjs/common';
 import { ClientService } from './client.service';
 import { Client } from './schemas/client.schema';
+import { CreateClientDto } from './dto/create-client.dto';
+import { UpdateClientDto } from './dto/update-client.dto';
 import { Gender } from '../common/gender.enum';
 import { ContactType } from './enum/contact-type.enum';
 
@@ -43,20 +45,20 @@ export class ClientController {
   }
 
   @Post()
-  async create(@Body() createClientDto: Partial<Client>): Promise<Client> {
+  async create(@Body() createClientDto: CreateClientDto): Promise<Client> {
     return this.clientService.create(createClientDto);
   }
 
   @Put(':id')
   async update(
     @Param('id') id: string,
-    @Body() updateClientDto: Partial<Client>,
+    @Body() updateClientDto: UpdateClientDto,
   ): Promise<Client> {
     return this.clientService.update(id, updateClientDto);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<void> {
+  async remove(@Param('id') id: string): Promise<boolean> {
     return this.clientService.remove(id);
   }
 }

@@ -6,6 +6,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { HrDepartment } from './entity/hr-department.entity';
+import { CreateHrDto } from './dto/create-hr.dto';
+import { UpdateHrDto } from './dto/update-hr.dto';
 export interface HrFilterOptions {
   page?: number;
   limit?: number;
@@ -63,9 +65,12 @@ export class HrService {
     }
   }
 
-  async create(createHrDto: Partial<HrDepartment>): Promise<HrDepartment> {
+  async create(createHrDto: CreateHrDto): Promise<HrDepartment> {
     try {
-      const hr = this.hrRepository.create(createHrDto);
+      const hr = this.hrRepository.create({
+        employee: { id: createHrDto.employeeId },
+        position: { id: createHrDto.positionId },
+      });
       return await this.hrRepository.save(hr);
     } catch (error) {
       throw new BadRequestException(
@@ -74,10 +79,7 @@ export class HrService {
     }
   }
 
-  async update(
-    id: number,
-    updateHrDto: Partial<HrDepartment>,
-  ): Promise<HrDepartment> {
+  async update(id: number, updateHrDto: UpdateHrDto): Promise<HrDepartment> {
     try {
       const hr = await this.findOne(id);
 
@@ -85,7 +87,11 @@ export class HrService {
         throw new NotFoundException(`HR record with ID ${id} not found`);
       }
 
-      await this.hrRepository.update(id, updateHrDto);
+      await this.hrRepository.update(id, {
+        employee: { id: updateHrDto.employeeId },
+        position: { id: updateHrDto.positionId },
+      });
+
       return await this.hrRepository.findOne({
         where: { id },
         relations: ['employee', 'position'],
@@ -98,7 +104,7 @@ export class HrService {
     }
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number): Promise<boolean> {
     try {
       const hr = await this.findOne(id);
 
@@ -107,6 +113,8 @@ export class HrService {
       }
 
       await this.hrRepository.delete(id);
+
+      return true;
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       throw new BadRequestException(
