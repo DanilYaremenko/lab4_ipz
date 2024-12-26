@@ -5,7 +5,7 @@ import { ContactType } from '../enum/contact-type.enum';
 
 export type ClientDocument = Client & Document;
 
-@Schema()
+@Schema({ timestamps: true, versionKey: false })
 export class Client {
   @Prop({ required: true })
   firstName: string;

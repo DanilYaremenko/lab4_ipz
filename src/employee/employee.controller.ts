@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+} from '@nestjs/common';
 import { EmployeeService } from './employee.service';
 import { Employee } from './entity/employee.entity';
 
@@ -7,11 +15,8 @@ export class EmployeeController {
   constructor(private readonly employeeService: EmployeeService) {}
 
   @Get()
-  async findAll(
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-  ): Promise<{ data: Employee[]; total: number }> {
-    return this.employeeService.findAll(page, limit);
+  async findAll(): Promise<Employee[]> {
+    return this.employeeService.findAll();
   }
 
   @Get(':id')
@@ -20,7 +25,9 @@ export class EmployeeController {
   }
 
   @Post()
-  async create(@Body() createEmployeeDto: Partial<Employee>): Promise<Employee> {
+  async create(
+    @Body() createEmployeeDto: Partial<Employee>,
+  ): Promise<Employee> {
     return this.employeeService.create(createEmployeeDto);
   }
 
@@ -33,7 +40,7 @@ export class EmployeeController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number): Promise<void> {
+  async remove(@Param('id') id: number): Promise<boolean> {
     return this.employeeService.remove(id);
   }
 }

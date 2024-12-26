@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Employee } from './entity/employee.entity';
@@ -10,29 +14,82 @@ export class EmployeeService {
     private employeeRepository: Repository<Employee>,
   ) {}
 
-  async findAll(page = 1, limit = 10): Promise<{ data: Employee[]; total: number }> {
-    const [data, total] = await this.employeeRepository.findAndCount({
-      skip: (page - 1) * limit,
-      take: limit,
-    });
-    return { data, total };
+  async findAll(): Promise<Employee[]> {
+    try {
+      return await this.employeeRepository.find();
+    } catch (error) {
+      throw new BadRequestException(
+        `Failed to fetch employees: ${error.message}`,
+      );
+    }
   }
 
   async findOne(id: number): Promise<Employee> {
-    return this.employeeRepository.findOne({ where: { id } });
+    try {
+      const employee = await this.employeeRepository.findOne({ where: { id } });
+      if (!employee) {
+        throw new NotFoundException(`Employee with ID ${id} not found`);
+      }
+
+      return employee;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException(
+        `Failed to fetch employee with ID ${id}: ${error.message}`,
+      );
+    }
   }
 
   async create(createEmployeeDto: Partial<Employee>): Promise<Employee> {
-    const employee = this.employeeRepository.create(createEmployeeDto);
-    return this.employeeRepository.save(employee);
+    try {
+      const employee = this.employeeRepository.create(createEmployeeDto);
+
+      return await this.employeeRepository.save(employee);
+    } catch (error) {
+      throw new BadRequestException(
+        `Failed to create employee: ${error.message}`,
+      );
+    }
   }
 
-  async update(id: number, updateEmployeeDto: Partial<Employee>): Promise<Employee> {
-    await this.employeeRepository.update(id, updateEmployeeDto);
-    return this.employeeRepository.findOne({ where: { id } });
+  async update(
+    id: number,
+    updateEmployeeDto: Partial<Employee>,
+  ): Promise<Employee> {
+    try {
+      const employee = await this.findOne(id);
+      if (!employee) {
+        throw new NotFoundException(`Employee with ID ${id} not found`);
+      }
+      await this.employeeRepository.update(id, updateEmployeeDto);
+
+      return await this.employeeRepository.findOne({ where: { id } });
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException(
+        `Failed to update employee with ID ${id}: ${error.message}`,
+      );
+    }
   }
 
-  async remove(id: number): Promise<void> {
-    await this.employeeRepository.delete(id);
+  async remove(id: number): Promise<boolean> {
+    try {
+      const employee = await this.findOne(id);
+      if (!employee) {
+        throw new NotFoundException(`Employee with ID ${id} not found`);
+      }
+
+      await this.employeeRepository.delete(id);
+
+      return true;
+    } catch (error) {
+      throw new BadRequestException(
+        `Failed to delete employee with ID ${id}: ${error.message}`,
+      );
+    }
   }
 }

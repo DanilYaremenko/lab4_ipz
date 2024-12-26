@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+} from '@nestjs/common';
 import { PositionService } from './position.service';
 import { Position } from './entity/position.entity';
 
@@ -7,11 +15,8 @@ export class PositionController {
   constructor(private readonly positionService: PositionService) {}
 
   @Get()
-  async findAll(
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-  ): Promise<{ data: Position[]; total: number }> {
-    return this.positionService.findAll(page, limit);
+  async findAll(): Promise<Position[]> {
+    return this.positionService.findAll();
   }
 
   @Get(':id')
@@ -20,7 +25,9 @@ export class PositionController {
   }
 
   @Post()
-  async create(@Body() createPositionDto: Partial<Position>): Promise<Position> {
+  async create(
+    @Body() createPositionDto: Partial<Position>,
+  ): Promise<Position> {
     return this.positionService.create(createPositionDto);
   }
 

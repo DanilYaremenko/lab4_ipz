@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { HrService } from './hr.service';
 import { HrDepartment } from './entity/hr-department.entity';
 
@@ -21,7 +30,9 @@ export class HrController {
   }
 
   @Post()
-  async create(@Body() createHrDto: Partial<HrDepartment>): Promise<HrDepartment> {
+  async create(
+    @Body() createHrDto: Partial<HrDepartment>,
+  ): Promise<HrDepartment> {
     return this.hrService.create(createHrDto);
   }
 

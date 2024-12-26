@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Position } from './entity/position.entity';
@@ -10,29 +14,75 @@ export class PositionService {
     private positionRepository: Repository<Position>,
   ) {}
 
-  async findAll(page = 1, limit = 10): Promise<{ data: Position[]; total: number }> {
-    const [data, total] = await this.positionRepository.findAndCount({
-      skip: (page - 1) * limit,
-      take: limit,
-    });
-    return { data, total };
+  async findAll(): Promise<Position[]> {
+    try {
+      return await this.positionRepository.find();
+    } catch (error) {
+      throw new BadRequestException(
+        `Failed to fetch positions: ${error.message}`,
+      );
+    }
   }
 
   async findOne(id: number): Promise<Position> {
-    return this.positionRepository.findOne({ where: { id } });
+    try {
+      const position = await this.positionRepository.findOne({ where: { id } });
+      if (!position) {
+        throw new NotFoundException(`Position with ID ${id} not found`);
+      }
+      return position;
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new BadRequestException(`Failed to fetch position with ID ${id}`);
+    }
   }
 
   async create(createPositionDto: Partial<Position>): Promise<Position> {
-    const position = this.positionRepository.create(createPositionDto);
-    return this.positionRepository.save(position);
+    try {
+      const position = this.positionRepository.create(createPositionDto);
+      return await this.positionRepository.save(position);
+    } catch (error) {
+      throw new BadRequestException(
+        `Failed to create position: ${error.message}`,
+      );
+    }
   }
 
-  async update(id: number, updatePositionDto: Partial<Position>): Promise<Position> {
-    await this.positionRepository.update(id, updatePositionDto);
-    return this.positionRepository.findOne({ where: { id } });
+  async update(
+    id: number,
+    updatePositionDto: Partial<Position>,
+  ): Promise<Position> {
+    try {
+      const position = await this.findOne(id);
+
+      if (!position) {
+        throw new NotFoundException(`Position with ID ${id} not found`);
+      }
+
+      await this.positionRepository.update(id, updatePositionDto);
+      return await this.positionRepository.findOne({ where: { id } });
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new BadRequestException(
+        `Failed to update position with ID ${id}: ${error.message}`,
+      );
+    }
   }
 
   async remove(id: number): Promise<void> {
-    await this.positionRepository.delete(id);
+    try {
+      const position = await this.findOne(id);
+
+      if (!position) {
+        throw new NotFoundException(`Position with ID ${id} not found`);
+      }
+
+      await this.positionRepository.delete(id);
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new BadRequestException(
+        `Failed to delete position with ID ${id}: ${error.message}`,
+      );
+    }
   }
 }
